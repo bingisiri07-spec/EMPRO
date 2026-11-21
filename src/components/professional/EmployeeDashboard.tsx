@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Clock, 
   Wallet, 
-  CalendarCheck, 
+  Calendar, 
   Video, 
   MapPin, 
   Sparkles, 
@@ -20,14 +20,12 @@ import {
   ResponsiveContainer, 
   CartesianGrid 
 } from 'recharts';
-import { Persona, LeaveBalance } from '../../types';
+import { Persona } from '../../types';
 import { 
   MOCK_ATTENDANCE_WEEK, 
   MOCK_SALARY_DATA, 
-  MOCK_LEAVE_BALANCES, 
   MOCK_MEETINGS 
 } from '../../data/mockData';
-import { LeaveApplyModal } from './LeaveApplyModal';
 import { useTheme } from '../../context/ThemeContext';
 
 interface EmployeeDashboardProps {
@@ -42,8 +40,6 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
   const { isDark } = useTheme();
   const [isCheckedIn, setIsCheckedIn] = useState(true);
   const [checkInTime, setCheckInTime] = useState('09:10 AM');
-  const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [leaveBalances, setLeaveBalances] = useState<LeaveBalance>(MOCK_LEAVE_BALANCES);
   const [copilotQuery, setCopilotQuery] = useState('');
   const [copilotResponse, setCopilotResponse] = useState<string | null>(null);
   const [isCopilotThinking, setIsCopilotThinking] = useState(false);
@@ -59,16 +55,6 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     }
   };
 
-  const handleApplyLeaveSubmit = (type: 'Casual' | 'Sick' | 'Earned', days: number) => {
-    setLeaveBalances(prev => ({
-      ...prev,
-      [type.toLowerCase()]: {
-        ...prev[type.toLowerCase() as keyof typeof prev],
-        available: Math.max(0, (prev[type.toLowerCase() as keyof typeof prev] as { available: number; total: number }).available - days),
-      }
-    }));
-  };
-
   const handleCopilotAsk = (e: React.FormEvent) => {
     e.preventDefault();
     if (!copilotQuery.trim()) return;
@@ -79,14 +65,16 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
     // Context-isolated company policy answers
     setTimeout(() => {
       const q = copilotQuery.toLowerCase();
-      if (q.includes('leave') || q.includes('carry')) {
-        setCopilotResponse('Nexus Technologies Leave Policy: Up to 10 days of unused Earned Leave carry forward to the next fiscal calendar. Casual and Sick leaves expire annually on Dec 31st.');
+      if (q.includes('event') || q.includes('summit') || q.includes('hackathon')) {
+        setCopilotResponse('Upcoming Company Events: The "AI Agents in Production Summit" is scheduled for Nov 28th, and the "Q4 Nexus Hackathon" begins Dec 5th. Both have open contribution opportunities!');
+      } else if (q.includes('project') || q.includes('apollo') || q.includes('contribute')) {
+        setCopilotResponse('Project Intelligence: Apollo (Enterprise Knowledge Engine) has an active vacancy for a temporary UI/UX Designer. You can volunteer or review skill recommendations in the Projects module.');
       } else if (q.includes('salary') || q.includes('pf') || q.includes('deduct')) {
         setCopilotResponse('Nexus Technologies Payroll FAQ: Employee Provident Fund (PF) is computed at 12% of Basic Pay (₹92,500), resulting in ₹11,100 monthly statutory contribution matching employer share.');
       } else if (q.includes('meeting') || q.includes('today')) {
         setCopilotResponse('You have 2 scheduled sessions today: Core Platform Sync at 02:30 PM (Google Meet) and 1-on-1 Sync with Director Sarah Jenkins at 04:00 PM.');
       } else {
-        setCopilotResponse(`Nexus Policy Assistant: Your inquiry regarding "${copilotQuery}" has been checked against the employee handbook. For exceptional approvals, reach out to HR Marcus Vance.`);
+        setCopilotResponse(`Company Policy Assistant: Your inquiry regarding "${copilotQuery}" has been checked against corporate guidelines.`);
       }
       setIsCopilotThinking(false);
     }, 600);
@@ -199,27 +187,25 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           </div>
         </div>
 
-        {/* Leave Balance Card */}
+        {/* Company Events Card */}
         <div 
-          onClick={() => onNavigateTab('leave')}
+          onClick={() => onNavigateTab('events')}
           className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B] hover:border-cyan-500/40 transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between text-[#94A3B8] mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider">Leave Balance</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Company Events</span>
             <div className="w-8 h-8 rounded-lg bg-cyan-950/50 border border-cyan-800/40 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform">
-              <CalendarCheck className="w-4 h-4" />
+              <Calendar className="w-4 h-4" />
             </div>
           </div>
           <p className="text-2xl font-bold text-[#F8FAFC]">
-            {leaveBalances.casual.available + leaveBalances.sick.available + leaveBalances.earned.available} Days
+            4 Active
           </p>
           <p className="text-[11px] text-[#94A3B8] mt-1">
-            Casual {leaveBalances.casual.available} • Sick {leaveBalances.sick.available} • Earned {leaveBalances.earned.available}
+            AI Agent Summit • Q4 Hackathon
           </p>
           <div className="pt-2 flex items-center justify-between text-[11px] text-cyan-400 font-medium">
-            <span onClick={(e) => { e.stopPropagation(); setShowLeaveModal(true); }} className="hover:underline">
-              + Apply Leave
-            </span>
+            <span>Explore & Volunteer</span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
           </div>
         </div>
@@ -475,7 +461,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
               type="text"
               value={copilotQuery}
               onChange={(e) => setCopilotQuery(e.target.value)}
-              placeholder="Ask workplace policy assistant..."
+              placeholder="Ask workplace policy or project assistant..."
               className="w-full bg-[#080D1B] border border-[#1E293B] focus:border-cyan-500 rounded-xl py-2.5 pl-3 pr-10 text-xs text-[#F8FAFC] placeholder-[#64748B] focus:outline-none transition-colors"
             />
             <button
@@ -488,14 +474,6 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           </form>
         </div>
       </div>
-
-      {/* Leave Application Modal */}
-      <LeaveApplyModal
-        isOpen={showLeaveModal}
-        onClose={() => setShowLeaveModal(false)}
-        leaveBalances={leaveBalances}
-        onSubmitLeave={handleApplyLeaveSubmit}
-      />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database.types';
 
 // Retrieve credentials from Vite environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -25,9 +26,9 @@ const safeKey = supabasePublishableKey || 'placeholder-publishable-key';
 
 /**
  * Centralized Supabase Client for EMPRO
- * Configured with persistent local session handling and token auto-refresh
+ * Fully typed with Database schema, configured with persistent local session handling and token auto-refresh
  */
-export const supabase: SupabaseClient = createClient(safeUrl, safeKey, {
+export const supabase: SupabaseClient<Database> = createClient<Database>(safeUrl, safeKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,

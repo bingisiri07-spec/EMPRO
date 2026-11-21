@@ -3,22 +3,18 @@ import {
   Building2, 
   User, 
   LayoutDashboard, 
-  CreditCard, 
   Clock, 
   Wallet, 
-  CalendarCheck, 
   Video, 
-  FileText, 
   Sparkles, 
-  BookOpen, 
   Award, 
-  CheckSquare, 
-  Milestone, 
   Users, 
   Shield, 
   ChevronLeft, 
   ChevronRight,
-  ShieldCheck,
+  Calendar,
+  Briefcase,
+  BrainCircuit,
   X
 } from 'lucide-react';
 import { Domain, Role } from '../../types';
@@ -48,17 +44,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen,
   onCloseMobile,
 }) => {
-  const professionalTabs = [
+  const companyTabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'digital-id', label: 'Digital ID', icon: CreditCard },
+    { id: 'events', label: 'Events', icon: Calendar, badge: '4 active' },
+    { id: 'projects', label: 'Projects', icon: Briefcase, badge: 'AI Match' },
     { id: 'attendance', label: 'Attendance', icon: Clock },
     { id: 'salary-vault', label: 'Salary & Vault', icon: Wallet },
-    { id: 'leave', label: 'Leave', icon: CalendarCheck, badge: '28d' },
     { id: 'meetings', label: 'Meetings', icon: Video, badge: '2 today' },
-    { id: 'documents', label: 'Documents', icon: FileText },
-    { id: 'pro-copilot', label: 'Professional Copilot', icon: Sparkles },
+    { id: 'pro-copilot', label: 'Company Copilot', icon: Sparkles },
     ...(userRole === 'manager' ? [
-      { id: 'manager-approvals', label: 'Leave Approvals', icon: ShieldCheck, badge: '1 pending', roleRequired: 'manager' },
       { id: 'manager-team', label: 'Team Attendance', icon: Users, roleRequired: 'manager' }
     ] : []),
     ...(userRole === 'hr' ? [
@@ -67,19 +61,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ] : []),
   ];
 
-  const personalTabs = [
-    { id: 'personal-overview', label: 'Personal Overview', icon: LayoutDashboard },
-    { id: 'my-profile', label: 'My Profile', icon: User },
-    { id: 'diary', label: 'Diary & Notes', icon: BookOpen },
+  const lifeTabs = [
+    { id: 'personal-overview', label: 'Life Overview', icon: LayoutDashboard },
+    { id: 'decision-simulator', label: 'Decision Simulator', icon: BrainCircuit, badge: 'AI Studio' },
     { id: 'achievements', label: 'Achievements', icon: Award },
-    { id: 'goals', label: 'Goals & Tasks', icon: CheckSquare, badge: '3 active' },
-    { id: 'timeline', label: 'Life Timeline', icon: Milestone },
     { id: 'community', label: 'Community Hub', icon: Users },
-    { id: 'personal-copilot', label: 'Personal Copilot', icon: Sparkles },
+    { id: 'my-profile', label: 'My Profile', icon: User },
+    { id: 'personal-copilot', label: 'Life Copilot', icon: Sparkles },
     { id: 'privacy', label: 'Privacy & Sharing', icon: Shield },
   ];
 
-  const currentTabs = currentDomain === 'professional' ? professionalTabs : personalTabs;
+  const currentTabs = currentDomain === 'professional' ? companyTabs : lifeTabs;
 
   return (
     <>
@@ -154,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }`}
                 >
                   <Building2 className="w-3.5 h-3.5" />
-                  <span>Work</span>
+                  <span>Company</span>
                 </button>
                 <button
                   onClick={() => onSelectDomain('personal')}
@@ -177,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       ? 'bg-blue-600 text-white shadow-blue-glow'
                       : 'text-[#94A3B8] hover:bg-[#151F35]'
                   }`}
-                  title="Switch to Work (Professional)"
+                  title="Switch to Company Domain"
                 >
                   <Building2 className="w-4 h-4" />
                 </button>
@@ -188,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       ? 'bg-cyan-600 text-white shadow-cyan-glow'
                       : 'text-[#94A3B8] hover:bg-[#151F35]'
                   }`}
-                  title="Switch to Life (Personal)"
+                  title="Switch to Life Domain"
                 >
                   <User className="w-4 h-4" />
                 </button>
@@ -201,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="px-2 pb-1.5">
               {(!isCollapsed || isMobileOpen) && (
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#64748B]">
-                  {currentDomain === 'professional' ? 'Professional Workspace' : 'Personal Domain'}
+                  {currentDomain === 'professional' ? 'Company Workspace' : 'Life Domain'}
                 </span>
               )}
             </div>

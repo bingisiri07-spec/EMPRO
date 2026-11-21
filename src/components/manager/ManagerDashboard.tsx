@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { 
   Users, 
-  CalendarCheck, 
+  Briefcase, 
   Clock, 
   CheckCircle2, 
   XCircle, 
   Video, 
   ShieldCheck, 
-  Calendar
+  Calendar,
+  ArrowRight
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -18,8 +19,8 @@ import {
   ResponsiveContainer, 
   CartesianGrid 
 } from 'recharts';
-import { Persona, LeaveRequest } from '../../types';
-import { MOCK_LEAVE_REQUESTS } from '../../data/mockData';
+import { Persona, EventContributionRequest } from '../../types';
+import { MOCK_EVENT_CONTRIBUTIONS, MOCK_PROJECTS } from '../../data/mockData';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ManagerDashboardProps {
@@ -29,10 +30,10 @@ interface ManagerDashboardProps {
 
 export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
   persona,
-  onNavigateTab: _onNavigateTab,
+  onNavigateTab,
 }) => {
   const { isDark } = useTheme();
-  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(MOCK_LEAVE_REQUESTS);
+  const [contributions, setContributions] = useState<EventContributionRequest[]>(MOCK_EVENT_CONTRIBUTIONS);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
   const teamAttendanceData = [
@@ -54,15 +55,16 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
     { id: 'NX-4255', name: 'Samira Khan', role: 'QA Automation Lead', status: 'Present', checkIn: '09:12 AM', location: 'HQ - 4F' },
   ];
 
-  const handleLeaveAction = (id: string, action: 'Approved' | 'Rejected') => {
-    setLeaveRequests(prev => prev.map(req => {
+  const handleContributionAction = (id: string, action: 'approved' | 'rejected') => {
+    setContributions(prev => prev.map(req => {
       if (req.id === id) {
-        return { ...req, status: action, approver: persona.name };
+        return { ...req, status: action, assignedRole: action === 'approved' ? 'Assigned Lead' : undefined };
       }
       return req;
     }));
 
-    setFeedbackNotice(`Request ${action} for ${leaveRequests.find(r => r.id === id)?.employeeName}`);
+    const targetReq = contributions.find(r => r.id === id);
+    setFeedbackNotice(`Contribution request ${action} for ${targetReq?.employeeName}`);
     setTimeout(() => setFeedbackNotice(null), 2500);
   };
 
@@ -139,16 +141,20 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B]">
+        <div 
+          onClick={() => onNavigateTab('projects')}
+          className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B] hover:border-blue-500/40 cursor-pointer transition-all"
+        >
           <div className="flex items-center justify-between text-[#94A3B8] mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider">Leave Requests</span>
-            <CalendarCheck className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-semibold uppercase tracking-wider">Project vacancies</span>
+            <Briefcase className="w-4 h-4 text-amber-400" />
           </div>
           <p className="text-2xl font-bold text-[#F8FAFC]">
-            {leaveRequests.filter(r => r.status === 'Pending').length} Pending
+            {MOCK_PROJECTS.filter(p => p.isRequiringContributors).length} Seeking Help
           </p>
-          <p className="text-[11px] text-amber-400 mt-1">
-            Requires Manager Action
+          <p className="text-[11px] text-amber-400 mt-1 flex items-center justify-between">
+            <span>Apollo UI/UX Designer needed</span>
+            <ArrowRight className="w-3.5 h-3.5 text-cyan-400" />
           </p>
         </div>
 
@@ -164,22 +170,22 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
         </div>
       </div>
 
-      {/* 3. Leave Approvals & Team Punctuality Split */}
+      {/* 3. Contribution Approvals & Team Punctuality Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Pending Approvals Panel (7 Cols) */}
         <div className="lg:col-span-7 p-6 rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-4">
           <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
             <div>
-              <h3 className="text-sm font-bold text-[#F8FAFC]">Pending Leave Approvals</h3>
-              <p className="text-xs text-[#94A3B8]">Review team absence requests against shift coverage</p>
+              <h3 className="text-sm font-bold text-[#F8FAFC]">Contribution Requests & Approvals</h3>
+              <p className="text-xs text-[#94A3B8]">Review voluntary event and project contribution applications</p>
             </div>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800/40">
-              {leaveRequests.filter(r => r.status === 'Pending').length} Action Required
+              {contributions.filter(r => r.status === 'pending').length} Action Required
             </span>
           </div>
 
           <div className="space-y-3">
-            {leaveRequests.map((req) => (
+            {contributions.map((req) => (
               <div 
                 key={req.id}
                 className="p-4 rounded-xl bg-[#080D1B] border border-[#1E293B] space-y-3"
@@ -192,30 +198,30 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                         {req.employeeId}
                       </span>
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800/40">
-                        {req.type} Leave ({req.days} days)
+                        {req.contributionCategory}
                       </span>
                     </div>
                     <p className="text-[11px] text-[#94A3B8] mt-1 flex items-center gap-1.5">
                       <Calendar className="w-3 h-3 text-cyan-400" />
-                      <span>{req.startDate} to {req.endDate}</span>
+                      <span>{req.eventTitle}</span>
                       <span>•</span>
-                      <span>Reason: "{req.reason}"</span>
+                      <span>"{req.description}"</span>
                     </p>
                   </div>
 
                   {/* Status Badge or Action Buttons */}
                   <div className="shrink-0">
-                    {req.status === 'Pending' ? (
+                    {req.status === 'pending' ? (
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleLeaveAction(req.id, 'Approved')}
+                          onClick={() => handleContributionAction(req.id, 'approved')}
                           className="py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs flex items-center gap-1 transition-colors shadow-dark-sm"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Approve</span>
                         </button>
                         <button
-                          onClick={() => handleLeaveAction(req.id, 'Rejected')}
+                          onClick={() => handleContributionAction(req.id, 'rejected')}
                           className="py-1.5 px-3 rounded-lg bg-[#151F35] hover:bg-red-950/40 text-red-400 hover:text-red-300 border border-red-500/30 font-medium text-xs flex items-center gap-1 transition-colors"
                         >
                           <XCircle className="w-3.5 h-3.5" />
@@ -224,11 +230,11 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                       </div>
                     ) : (
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg ${
-                        req.status === 'Approved' 
+                        req.status === 'approved' 
                           ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/40' 
                           : 'bg-red-950 text-red-400 border border-red-800/40'
                       }`}>
-                        {req.status} by {req.approver}
+                        {req.status.toUpperCase()}
                       </span>
                     )}
                   </div>

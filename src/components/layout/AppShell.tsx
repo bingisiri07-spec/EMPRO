@@ -8,13 +8,12 @@ import { EmployeeDashboard } from '../professional/EmployeeDashboard';
 import { PersonalDashboard } from '../personal/PersonalDashboard';
 import { ManagerDashboard } from '../manager/ManagerDashboard';
 import { HRDashboard } from '../hr/HRDashboard';
-import { DigitalIDModule } from '../modules/DigitalIDModule';
+import { EventsModule } from '../modules/EventsModule';
+import { ProjectsModule } from '../modules/ProjectsModule';
 import { SalaryVaultModule } from '../modules/SalaryVaultModule';
 import { AttendanceModule } from '../modules/AttendanceModule';
-import { LeaveModule } from '../modules/LeaveModule';
 import { MeetingsModule } from '../modules/MeetingsModule';
-import { DocumentsModule } from '../modules/DocumentsModule';
-import { DiaryModule } from '../modules/DiaryModule';
+import { DecisionSimulatorModule } from '../modules/DecisionSimulatorModule';
 import { AchievementsModule } from '../modules/AchievementsModule';
 import { CommunityModule } from '../modules/CommunityModule';
 import { CopilotModule } from '../modules/CopilotModule';
@@ -120,22 +119,20 @@ export const AppShell: React.FC = () => {
                 persona={currentPersona}
                 onNavigateTab={(tab) => setActiveTab(tab)}
               />
-            ) : activeTab === 'digital-id' ? (
-              <DigitalIDModule persona={currentPersona} />
+            ) : activeTab === 'events' ? (
+              <EventsModule currentUserId={currentPersona.id} userRole={currentPersona.role} />
+            ) : activeTab === 'projects' ? (
+              <ProjectsModule currentUserId={currentPersona.id} userRole={currentPersona.role} />
             ) : activeTab === 'salary-vault' ? (
               <SalaryVaultModule />
             ) : activeTab === 'attendance' ? (
               <AttendanceModule />
-            ) : activeTab === 'leave' ? (
-              <LeaveModule />
             ) : activeTab === 'meetings' ? (
               <MeetingsModule />
-            ) : activeTab === 'documents' ? (
-              <DocumentsModule persona={currentPersona} />
             ) : activeTab === 'pro-copilot' ? (
               <CopilotModule currentDomain="professional" />
             ) : (
-              /* Professional Module Placeholder */
+              /* Company Module Placeholder */
               <div className="p-8 rounded-2xl bg-[#10182A] border border-[#1E293B] text-center space-y-4">
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-[#151F35] border border-blue-500/30 flex items-center justify-center text-cyan-400">
                   <Sparkles className="w-6 h-6 animate-pulse" />
@@ -145,7 +142,7 @@ export const AppShell: React.FC = () => {
                     {activeTab.replace('-', ' ')}
                   </h3>
                   <p className="text-xs text-[#94A3B8] mt-1 max-w-md mx-auto">
-                    Corporate workforce module with strict company RBAC authorization and audit boundaries.
+                    Corporate collaboration module with company RBAC authorization and audit boundaries.
                   </p>
                 </div>
                 <div className="pt-2">
@@ -153,18 +150,18 @@ export const AppShell: React.FC = () => {
                     onClick={() => setActiveTab('overview')}
                     className="py-2 px-4 rounded-xl bg-[#151F35] hover:bg-[#19253F] text-xs font-medium text-cyan-300 border border-[#1E293B] transition-colors"
                   >
-                    Return to Professional Overview
+                    Return to Company Overview
                   </button>
                 </div>
               </div>
             )
-          ) : activeTab === 'personal-overview' || activeTab === 'my-profile' || activeTab === 'goals' || activeTab === 'timeline' || activeTab === 'privacy' ? (
+          ) : activeTab === 'decision-simulator' ? (
+            <DecisionSimulatorModule />
+          ) : activeTab === 'personal-overview' || activeTab === 'my-profile' || activeTab === 'privacy' ? (
             <PersonalDashboard
               persona={currentPersona}
               onNavigateTab={(tab) => setActiveTab(tab)}
             />
-          ) : activeTab === 'diary' ? (
-            <DiaryModule />
           ) : activeTab === 'achievements' ? (
             <AchievementsModule />
           ) : activeTab === 'community' ? (
