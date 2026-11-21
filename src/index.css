@@ -46,80 +46,82 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 
 
 /* ==========================================================================
-   LIGHT THEME - Professional, Premium SaaS-Style Light Mode
+   LIGHT THEME - Professional SaaS Light Mode with Soft Cool Bluish Surfaces
    ========================================================================== */
 html.light {
   color-scheme: light;
 }
 
 html.light body {
-  background-color: #F8FAFC !important;
+  background-color: #EBF1F7 !important;
   color: #0F172A !important;
 }
 
-/* Base backgrounds & panels */
+/* Base backgrounds & panels - elegant soft bluish surfaces */
 html.light .bg-\[\#080D1B\] {
-  background-color: #F8FAFC !important;
+  background-color: #E5EEF7 !important;
 }
 
 html.light .bg-\[\#080D1B\]\/95,
 html.light .bg-\[\#080D1B\]\/90,
 html.light .bg-\[\#080D1B\]\/80 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(235, 241, 247, 0.95) !important;
   backdrop-filter: blur(12px) !important;
 }
 
+/* Main layout boxes / cards - styled with a refined, soft bluish tint */
 html.light .bg-\[\#10182A\] {
-  background-color: #FFFFFF !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+  background-color: #F0F5FA !important;
+  box-shadow: 0 2px 6px -1px rgba(37, 99, 235, 0.06), 0 1px 3px -1px rgba(0, 0, 0, 0.04) !important;
 }
 
 html.light .bg-\[\#10182A\]\/95,
 html.light .bg-\[\#10182A\]\/90,
 html.light .bg-\[\#10182A\]\/80 {
-  background-color: rgba(255, 255, 255, 0.96) !important;
+  background-color: rgba(240, 245, 250, 0.96) !important;
 }
 
+/* Elevated cards & interactive surfaces */
 html.light .bg-\[\#151F35\] {
-  background-color: #F1F5F9 !important;
+  background-color: #DBE7F3 !important;
 }
 
 html.light .bg-\[\#151F35\]\/50 {
-  background-color: rgba(241, 245, 249, 0.7) !important;
+  background-color: rgba(219, 231, 243, 0.6) !important;
 }
 
-/* Hover surfaces */
+/* Hover surfaces with cool blue response */
 html.light .hover\:bg-\[\#151F35\]:hover {
-  background-color: #F1F5F9 !important;
+  background-color: #D3E2F0 !important;
 }
 
 html.light .hover\:bg-\[\#151F35\]\/50:hover {
-  background-color: #F8FAFC !important;
+  background-color: #E5EEF7 !important;
 }
 
 html.light .hover\:bg-\[\#10182A\]:hover {
-  background-color: #FFFFFF !important;
+  background-color: #E8F1F9 !important;
 }
 
 html.light .hover\:bg-\[\#19253F\]:hover {
-  background-color: #E2E8F0 !important;
+  background-color: #CADCEF !important;
 }
 
-/* Borders & Dividers */
+/* Subtle bluish-tinted borders & dividers */
 html.light .border-\[\#1E293B\] {
-  border-color: #E2E8F0 !important;
+  border-color: #CBD8E6 !important;
 }
 
 html.light .border-\[\#1E293B\]\/60,
 html.light .border-\[\#1E293B\]\/40 {
-  border-color: #EDF2F7 !important;
+  border-color: #D5E1EE !important;
 }
 
 html.light .divide-\[\#1E293B\]\/60 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #E2E8F0 !important;
+  border-color: #CBD8E6 !important;
 }
 
-/* Typography */
+/* Typography - Deep navy headings & legible dark slate text */
 html.light .text-\[\#F8FAFC\] {
   color: #0F172A !important;
 }
@@ -129,25 +131,25 @@ html.light .text-\[\#94A3B8\] {
 }
 
 html.light .text-\[\#64748B\] {
-  color: #64748B !important;
+  color: #475569 !important;
 }
 
 html.light .hover\:text-\[\#F8FAFC\]:hover {
   color: #0F172A !important;
 }
 
-/* Form inputs, textareas, selects */
+/* Form inputs, textareas, selects - crisp white for maximum legibility inside bluish boxes */
 html.light input:not([type="checkbox"]):not([type="radio"]),
 html.light textarea,
 html.light select {
   background-color: #FFFFFF !important;
-  border-color: #CBD5E1 !important;
+  border-color: #CBD8E6 !important;
   color: #0F172A !important;
 }
 
 html.light input::placeholder,
 html.light textarea::placeholder {
-  color: #94A3B8 !important;
+  color: #64748B !important;
 }
 
 html.light input:focus,
@@ -157,10 +159,10 @@ html.light select:focus {
   box-shadow: 0 0 0 1px #2563EB !important;
 }
 
-/* Card header gradients in light mode */
+/* Card header gradients in light mode - soft luminous bluish blend */
 html.light .from-\[\#10182A\] {
-  --tw-gradient-from: #FFFFFF var(--tw-gradient-from-position) !important;
-  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-from: #F0F5FA var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(240, 245, 250, 0) var(--tw-gradient-to-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
 
@@ -171,20 +173,20 @@ html.light .via-\[\#111F38\],
 html.light .via-\[\#112038\],
 html.light .via-\[\#111E36\],
 html.light .via-\[\#12203D\] {
-  --tw-gradient-to: rgba(241, 245, 249, 0) var(--tw-gradient-to-position) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), #F8FAFC var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+  --tw-gradient-to: rgba(229, 238, 247, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #E5EEF7 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
 }
 
 html.light .to-\[\#10182A\] {
-  --tw-gradient-to: #FFFFFF var(--tw-gradient-to-position) !important;
+  --tw-gradient-to: #F0F5FA var(--tw-gradient-to-position) !important;
 }
 
 html.light .from-\[\#152342\] {
-  --tw-gradient-from: #F8FAFC var(--tw-gradient-from-position) !important;
+  --tw-gradient-from: #E8F1F9 var(--tw-gradient-from-position) !important;
 }
 
 html.light .to-\[\#0A1020\] {
-  --tw-gradient-to: #FFFFFF var(--tw-gradient-to-position) !important;
+  --tw-gradient-to: #F0F5FA var(--tw-gradient-to-position) !important;
 }
 
 /* Light mode badges and tags */
