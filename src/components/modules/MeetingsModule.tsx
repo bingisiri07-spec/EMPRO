@@ -1,17 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Video, 
   Clock, 
   MapPin, 
   Sparkles, 
-  FileText 
+  FileText,
+  Calendar
 } from 'lucide-react';
 import { MeetingItem } from '../../types';
-import { MOCK_MEETINGS } from '../../data/mockData';
+import { meetingService } from '../../services/meetingService';
 
 export const MeetingsModule: React.FC = () => {
-  const [meetings] = useState<MeetingItem[]>(MOCK_MEETINGS);
+  const [meetings, setMeetings] = useState<MeetingItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingItem | null>(null);
+
+  useEffect(() => {
+    meetingService.getMeetings().then((data) => {
+      setMeetings(data);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+    });
+  }, []);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-300">
@@ -33,8 +44,19 @@ export const MeetingsModule: React.FC = () => {
       </div>
 
       {/* Meetings List */}
-      <div className="space-y-4">
-        {meetings.map((meeting) => (
+      {isLoading ? (
+        <div className="p-12 text-center text-xs text-[#94A3B8] rounded-2xl bg-[#10182A] border border-[#1E293B]">
+          Loading scheduled meetings and team syncs...
+        </div>
+      ) : meetings.length === 0 ? (
+        <div className="p-12 text-center text-xs text-[#94A3B8] rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-2">
+          <Calendar className="w-8 h-8 text-[#64748B] mx-auto mb-2" />
+          <p className="text-sm font-semibold text-[#F8FAFC]">No meetings scheduled</p>
+          <p>Your workspace calendar is clear for focused deep work.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {meetings.map((meeting) => (
           <div 
             key={meeting.id}
             className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B] hover:border-blue-500/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
@@ -106,6 +128,7 @@ export const MeetingsModule: React.FC = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Meeting Notes Detail Modal */}
       {selectedMeeting && (

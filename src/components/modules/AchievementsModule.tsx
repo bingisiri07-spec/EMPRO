@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Award } from 'lucide-react';
 import { AchievementItem, AchievementVisibility } from '../../types';
-import { MOCK_ACHIEVEMENTS } from '../../data/mockData';
+import { achievementService } from '../../services/achievementService';
 
 export const AchievementsModule: React.FC = () => {
-  const [achievements, setAchievements] = useState<AchievementItem[]>(MOCK_ACHIEVEMENTS);
+  const [achievements, setAchievements] = useState<AchievementItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
+
+  useEffect(() => {
+    achievementService.getAchievements().then((data) => {
+      setAchievements(data);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+    });
+  }, []);
 
   // New Achievement Form
   const [title, setTitle] = useState('');
@@ -19,7 +29,7 @@ export const AchievementsModule: React.FC = () => {
     setAchievements(prev => prev.map(a => a.id === id ? { ...a, visibility: newVisibility } : a));
   };
 
-  const handleAddAchievement = (e: React.FormEvent) => {
+  const handleAddAchievement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
@@ -35,6 +45,13 @@ export const AchievementsModule: React.FC = () => {
     };
 
     setAchievements([newAch, ...achievements]);
+    await achievementService.createAchievement('profile_current', {
+      title: newAch.title,
+      issuer: newAch.issuer,
+      category: newAch.category.toLowerCase() as any,
+      visibility: newAch.visibility,
+    });
+
     setTitle('');
     setIssuer('');
     setDescription('');
@@ -88,44 +105,56 @@ export const AchievementsModule: React.FC = () => {
       </div>
 
       {/* Achievements Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filtered.map((item) => (
-          <div
-            key={item.id}
-            className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B] hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4"
-          >
-            <div className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/40">
-                  {item.category}
-                </span>
-                <span className="text-xs text-slate-500 font-mono">{item.date}</span>
+      {isLoading ? (
+        <div className="p-12 text-center text-xs text-[#94A3B8] rounded-2xl bg-[#10182A] border border-[#1E293B]">
+          Loading verified achievements and credentials...
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="p-12 text-center text-xs text-[#94A3B8] rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-2">
+          <Award className="w-8 h-8 text-[#64748B] mx-auto mb-2" />
+          <p className="text-sm font-semibold text-[#F8FAFC]">No credentials in this category</p>
+          <p>Add your professional certifications, hackathon wins, or patents to build your portable record.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filtered.map((item) => (
+            <div
+              key={item.id}
+              className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B] hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4"
+            >
+              <div className="space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/40">
+                    {item.category}
+                  </span>
+                  <span className="text-xs text-slate-500 font-mono">{item.date}</span>
+                </div>
+                <h3 className="text-sm font-bold text-[#F8FAFC]">{item.title}</h3>
+                <p className="text-xs text-cyan-300 font-medium">{item.issuer}</p>
+                <p className="text-xs text-[#94A3B8] leading-relaxed">{item.description}</p>
+                {item.credentialId && (
+                  <p className="text-[10px] font-mono text-[#64748B]">ID: {item.credentialId}</p>
+                )}
               </div>
-              <h3 className="text-sm font-bold text-[#F8FAFC]">{item.title}</h3>
-              <p className="text-xs text-cyan-300 font-medium">{item.issuer}</p>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">{item.description}</p>
-              {item.credentialId && (
-                <p className="text-[10px] font-mono text-[#64748B]">ID: {item.credentialId}</p>
-              )}
-            </div>
 
-            {/* 4-Tier Visibility Control */}
-            <div className="pt-3 border-t border-[#1E293B] flex items-center justify-between">
-              <span className="text-xs text-[#94A3B8]">Visibility Permission:</span>
-              <select
-                value={item.visibility}
-                onChange={(e) => handleUpdateVisibility(item.id, e.target.value as AchievementVisibility)}
-                className="bg-[#080D1B] border border-[#1E293B] rounded-xl px-2.5 py-1.5 text-xs text-cyan-300 font-medium focus:border-cyan-500 focus:outline-none cursor-pointer"
-              >
-                <option value="private">🔒 Private (Only Me)</option>
-                <option value="connections">👥 Selected Connections</option>
-                <option value="company">🏢 Current Company</option>
-                <option value="public">🌐 Public Profile</option>
-              </select>
+              {/* 4-Tier Visibility Control */}
+              <div className="pt-3 border-t border-[#1E293B] flex items-center justify-between">
+                <span className="text-xs text-[#94A3B8]">Visibility Permission:</span>
+                <select
+                  value={item.visibility}
+                  onChange={(e) => handleUpdateVisibility(item.id, e.target.value as AchievementVisibility)}
+                  className="bg-[#080D1B] border border-[#1E293B] rounded-xl px-2.5 py-1.5 text-xs text-cyan-300 font-medium focus:border-cyan-500 focus:outline-none cursor-pointer"
+                >
+                  <option value="private">🔒 Private (Only Me)</option>
+                  <option value="connections">👥 Selected Connections</option>
+                  <option value="company">🏢 Current Company</option>
+                  <option value="public">🌐 Public Profile</option>
+                </select>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Add Credential Modal */}
       {showAddModal && (

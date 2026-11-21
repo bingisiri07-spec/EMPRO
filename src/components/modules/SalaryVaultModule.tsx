@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Download, 
   ShieldCheck, 
@@ -15,13 +15,27 @@ import {
   Tooltip, 
   CartesianGrid 
 } from 'recharts';
+import { salaryService } from '../../services/salaryService';
 import { useTheme } from '../../context/ThemeContext';
 
 export const SalaryVaultModule: React.FC = () => {
   const { isDark } = useTheme();
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+  const [salaryHistory, setSalaryHistory] = useState<any[]>([]);
 
-  const pastRevisions = [
+  useEffect(() => {
+    salaryService.getSalaryHistory().then((data) => {
+      setSalaryHistory(data);
+    });
+  }, []);
+
+  const pastRevisions = salaryHistory.length > 0 ? salaryHistory.map((s, idx) => ({
+    period: `${s.month} ${s.year}`,
+    gross: s.grossSalary,
+    net: s.netSalary,
+    status: s.status,
+    revisionNote: idx === 0 ? 'Annual Merit Increase (12%)' : 'Regular compensation',
+  })) : [
     { period: 'Nov 2026', gross: 185000, net: 146200, status: 'Processing', revisionNote: 'Annual Merit Increase (12%)' },
     { period: 'Oct 2026', gross: 165000, net: 131400, status: 'Paid', revisionNote: 'Regular compensation' },
     { period: 'Sep 2026', gross: 165000, net: 131400, status: 'Paid', revisionNote: 'Regular compensation' },

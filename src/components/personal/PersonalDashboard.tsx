@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Lock, 
   Shield, 
@@ -16,10 +16,8 @@ import {
   AchievementItem, 
   AchievementVisibility 
 } from '../../types';
-import { 
-  MOCK_ACHIEVEMENTS,
-  MOCK_DECISION_SIMULATIONS
-} from '../../data/mockData';
+import { achievementService } from '../../services/achievementService';
+import { decisionSimulatorService } from '../../services/decisionSimulatorService';
 
 interface PersonalDashboardProps {
   persona: Persona;
@@ -30,8 +28,13 @@ export const PersonalDashboard: React.FC<PersonalDashboardProps> = ({
   persona,
   onNavigateTab,
 }) => {
-  const [achievements, setAchievements] = useState<AchievementItem[]>(MOCK_ACHIEVEMENTS);
-  const [simulations] = useState(MOCK_DECISION_SIMULATIONS);
+  const [achievements, setAchievements] = useState<AchievementItem[]>([]);
+  const [simulations, setSimulations] = useState<any[]>([]);
+
+  useEffect(() => {
+    achievementService.getAchievements(persona.id).then(setAchievements);
+    decisionSimulatorService.getSimulations().then(setSimulations);
+  }, [persona.id]);
 
   // Personal Copilot State
   const [copilotInput, setCopilotInput] = useState('');

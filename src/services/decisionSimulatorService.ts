@@ -41,7 +41,7 @@ export const decisionSimulatorService = {
    * Generates deep multi-scenario feasibility analysis, skill gap assessment,
    * risk evaluation, and a 10-point structured report based on user inputs.
    */
-  async runSimulation(input: DecisionSimulationInput): Promise<DecisionSimulationReport> {
+  async runSimulation(input: DecisionSimulationInput, profileId?: string): Promise<DecisionSimulationReport> {
     // Generate intelligent deterministic analytical report based on inputs
     const isCompany = input.scope === 'company_based';
     const primarySkill = input.proposedSolution.toLowerCase().includes('rust') ? 'Rust' :
@@ -171,9 +171,26 @@ export const decisionSimulatorService = {
     }
 
     // Live Supabase persistence
+    let activeProfileId = profileId;
+    if (!activeProfileId) {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        activeProfileId = authData.user?.id;
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!activeProfileId) {
+      // In demo mode or offline without auth user, store in local memory
+      MOCK_DECISION_SIMULATIONS.unshift(generatedReport);
+      return generatedReport;
+    }
+
     const { data, error } = await supabase
       .from('decision_simulations' as any)
       .insert({
+        profile_id: activeProfileId,
         title: input.title,
         scope: input.scope,
         input: input,
@@ -200,5 +217,29 @@ export const decisionSimulatorService = {
       id: (data as any)?.id || generatedReport.id,
       createdAt: (data as any)?.created_at || generatedReport.createdAt,
     };
+  },
+
+  /**
+   * Deletes a decision simulation
+   */
+  async deleteSimulation(id: string): Promise<{ success: boolean; error?: string }> {
+    if (!isSupabaseConfigured()) {
+      const idx = MOCK_DECISION_SIMULATIONS.findIndex(s => s.id === id);
+      if (idx !== -1) {
+        MOCK_DECISION_SIMULATIONS.splice(idx, 1);
+      }
+      return { success: true };
+    }
+
+    const { error } = await supabase
+      .from('decision_simulations' as any)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
   },
 };

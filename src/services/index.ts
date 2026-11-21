@@ -5,6 +5,7 @@ export * from './salaryService';
 export * from './diaryService';
 export * from './achievementService';
 export * from './communityService';
+export * from './meetingService';
 export * from './eventsService';
 export * from './projectsService';
 export * from './decisionSimulatorService';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Briefcase, 
@@ -20,7 +20,8 @@ import {
   CartesianGrid 
 } from 'recharts';
 import { Persona, EventContributionRequest } from '../../types';
-import { MOCK_EVENT_CONTRIBUTIONS, MOCK_PROJECTS } from '../../data/mockData';
+import { eventsService } from '../../services/eventsService';
+import { MOCK_PROJECTS } from '../../data/mockData';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ManagerDashboardProps {
@@ -33,8 +34,12 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
   onNavigateTab,
 }) => {
   const { isDark } = useTheme();
-  const [contributions, setContributions] = useState<EventContributionRequest[]>(MOCK_EVENT_CONTRIBUTIONS);
+  const [contributions, setContributions] = useState<EventContributionRequest[]>([]);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    eventsService.getContributionRequests().then(setContributions);
+  }, []);
 
   const teamAttendanceData = [
     { day: 'Mon', present: 8, late: 0, onLeave: 0 },

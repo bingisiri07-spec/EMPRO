@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Clock, 
   MapPin, 
@@ -13,16 +13,28 @@ import {
   ResponsiveContainer, 
   CartesianGrid 
 } from 'recharts';
-import { MOCK_ATTENDANCE_WEEK } from '../../data/mockData';
+import { AttendanceRecord } from '../../types';
+import { attendanceService } from '../../services/attendanceService';
 import { useTheme } from '../../context/ThemeContext';
 
 export const AttendanceModule: React.FC = () => {
   const { isDark } = useTheme();
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCheckedIn, setIsCheckedIn] = useState(true);
   const [checkInTime, setCheckInTime] = useState('09:10 AM');
   const [showCorrectionModal, setShowCorrectionModal] = useState(false);
   const [correctionReason, setCorrectionReason] = useState('');
   const [correctionSuccess, setCorrectionSuccess] = useState(false);
+
+  useEffect(() => {
+    attendanceService.getAttendanceHistory().then((data) => {
+      setAttendanceData(data);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+    });
+  }, []);
 
   // November 2026 calendar days simulation
   const calendarDays = [
@@ -38,13 +50,14 @@ export const AttendanceModule: React.FC = () => {
     { day: 28, status: 'Leave' }, { day: 29, status: 'Leave' }, { day: 30, status: 'Upcoming' }
   ];
 
-  const handleToggleAttendance = () => {
+  const handleToggleAttendance = async () => {
     if (isCheckedIn) {
       setIsCheckedIn(false);
     } else {
       setIsCheckedIn(true);
       const now = new Date();
       setCheckInTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      await attendanceService.checkIn('org_default', 'member_current', 'Office HQ (Verified)');
     }
   };
 
@@ -192,26 +205,32 @@ export const AttendanceModule: React.FC = () => {
       <div className="p-6 rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-4">
         <h3 className="text-sm font-bold text-[#F8FAFC]">Weekly Shift Hours Breakdown</h3>
         <div className="h-60 w-full pt-2">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={MOCK_ATTENDANCE_WEEK} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} vertical={false} />
-              <XAxis dataKey="day" stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} />
-              <YAxis stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} domain={[0, 10]} />
-              <Tooltip
-                contentStyle={{ 
-                  backgroundColor: isDark ? '#10182A' : '#FFFFFF', 
-                  borderColor: isDark ? '#1E293B' : '#CBD5E1', 
-                  borderRadius: '12px', 
-                  fontSize: '11px', 
-                  color: isDark ? '#F8FAFC' : '#0F172A',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                }}
-                cursor={{ fill: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.05)' }}
-                formatter={(value: any) => [`${value} hrs`, 'Logged']}
-              />
-              <Bar dataKey="hoursWorked" fill="#3B82F6" radius={[6, 6, 0, 0]} name="Logged Hours" />
-            </BarChart>
-          </ResponsiveContainer>
+          {isLoading ? (
+            <div className="h-full flex items-center justify-center text-xs text-[#94A3B8]">
+              Loading attendance telemetry...
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={attendanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} vertical={false} />
+                <XAxis dataKey="day" stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} />
+                <YAxis stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} domain={[0, 10]} />
+                <Tooltip
+                  contentStyle={{ 
+                    backgroundColor: isDark ? '#10182A' : '#FFFFFF', 
+                    borderColor: isDark ? '#1E293B' : '#CBD5E1', 
+                    borderRadius: '12px', 
+                    fontSize: '11px', 
+                    color: isDark ? '#F8FAFC' : '#0F172A',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  cursor={{ fill: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.05)' }}
+                  formatter={(value: any) => [`${value} hrs`, 'Logged']}
+                />
+                <Bar dataKey="hoursWorked" fill="#3B82F6" radius={[6, 6, 0, 0]} name="Logged Hours" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 

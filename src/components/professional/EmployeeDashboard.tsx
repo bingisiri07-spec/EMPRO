@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Clock, 
   Wallet, 
@@ -20,12 +20,11 @@ import {
   ResponsiveContainer, 
   CartesianGrid 
 } from 'recharts';
-import { Persona } from '../../types';
-import { 
-  MOCK_ATTENDANCE_WEEK, 
-  MOCK_SALARY_DATA, 
-  MOCK_MEETINGS 
-} from '../../data/mockData';
+import { Persona, AttendanceRecord, MeetingItem, SalaryBreakdown } from '../../types';
+import { attendanceService } from '../../services/attendanceService';
+import { salaryService } from '../../services/salaryService';
+import { meetingService } from '../../services/meetingService';
+import { MOCK_SALARY_DATA, MOCK_ATTENDANCE_WEEK, MOCK_MEETINGS } from '../../data/mockData';
 import { useTheme } from '../../context/ThemeContext';
 
 interface EmployeeDashboardProps {
@@ -43,6 +42,17 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
   const [copilotQuery, setCopilotQuery] = useState('');
   const [copilotResponse, setCopilotResponse] = useState<string | null>(null);
   const [isCopilotThinking, setIsCopilotThinking] = useState(false);
+  const [attendanceWeek, setAttendanceWeek] = useState<AttendanceRecord[]>([]);
+  const [salaryData, setSalaryData] = useState<SalaryBreakdown>(MOCK_SALARY_DATA);
+  const [upcomingMeetings, setUpcomingMeetings] = useState<MeetingItem[]>([]);
+
+  useEffect(() => {
+    attendanceService.getAttendanceHistory(persona.id).then(setAttendanceWeek);
+    salaryService.getSalaryHistory(persona.id).then((history) => {
+      if (history.length > 0) setSalaryData(history[0]);
+    });
+    meetingService.getMeetings().then(setUpcomingMeetings);
+  }, [persona.id]);
 
   const handleToggleAttendance = () => {
     if (isCheckedIn) {
@@ -255,7 +265,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
 
           <div className="h-64 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={MOCK_ATTENDANCE_WEEK} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={attendanceWeek.length > 0 ? attendanceWeek : MOCK_ATTENDANCE_WEEK} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} vertical={false} />
                 <XAxis dataKey="day" stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} />
                 <YAxis stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} domain={[0, 10]} />
@@ -300,23 +310,23 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
             <div className="space-y-2.5 pt-4 text-xs">
               <div className="flex justify-between items-center py-1">
                 <span className="text-[#94A3B8]">Basic Pay (50%)</span>
-                <span className="font-mono font-semibold text-[#F8FAFC]">₹{MOCK_SALARY_DATA.basicPay.toLocaleString()}</span>
+                <span className="font-mono font-semibold text-[#F8FAFC]">₹{salaryData.basicPay.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-[#94A3B8]">House Rent Allowance (HRA)</span>
-                <span className="font-mono font-semibold text-[#F8FAFC]">₹{MOCK_SALARY_DATA.hra.toLocaleString()}</span>
+                <span className="font-mono font-semibold text-[#F8FAFC]">₹{salaryData.hra.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-[#94A3B8]">Special Allowance</span>
-                <span className="font-mono font-semibold text-[#F8FAFC]">₹{MOCK_SALARY_DATA.specialAllowance.toLocaleString()}</span>
+                <span className="font-mono font-semibold text-[#F8FAFC]">₹{salaryData.specialAllowance.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-1 text-red-400">
                 <span>Provident Fund (Statutory PF 12%)</span>
-                <span className="font-mono font-semibold">-₹{MOCK_SALARY_DATA.providentFund.toLocaleString()}</span>
+                <span className="font-mono font-semibold">-₹{salaryData.providentFund.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center py-1 text-red-400">
                 <span>Income Tax (TDS Estimate)</span>
-                <span className="font-mono font-semibold">-₹{MOCK_SALARY_DATA.incomeTaxTds.toLocaleString()}</span>
+                <span className="font-mono font-semibold">-₹{salaryData.incomeTaxTds.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -324,7 +334,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           <div className="p-4 rounded-xl bg-[#080D1B] border border-[#1E293B] space-y-2">
             <div className="flex justify-between items-center text-sm font-bold">
               <span className="text-[#F8FAFC]">Monthly Net Take-Home</span>
-              <span className="text-cyan-400 font-mono text-base">₹{MOCK_SALARY_DATA.netSalary.toLocaleString()}</span>
+              <span className="text-cyan-400 font-mono text-base">₹{salaryData.netSalary.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between text-[11px] text-[#94A3B8] pt-1 border-t border-[#1E293B]/60">
               <span>Payout Date: 30 Nov 2026</span>
@@ -359,7 +369,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           </div>
 
           <div className="space-y-3">
-            {MOCK_MEETINGS.slice(0, 2).map((meeting) => (
+            {(upcomingMeetings.length > 0 ? upcomingMeetings : MOCK_MEETINGS).slice(0, 2).map((meeting) => (
               <div 
                 key={meeting.id}
                 className="p-4 rounded-xl bg-[#080D1B] border border-[#1E293B] hover:border-blue-500/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   MessageSquare, 
@@ -7,16 +7,27 @@ import {
   Send 
 } from 'lucide-react';
 import { CommunityPost } from '../../types';
-import { MOCK_COMMUNITY_POSTS } from '../../data/mockData';
+import { communityService } from '../../services/communityService';
 
 export const CommunityModule: React.FC = () => {
-  const [posts, setPosts] = useState<CommunityPost[]>(MOCK_COMMUNITY_POSTS);
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [newPostText, setNewPostText] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('All');
 
   const groups = ['All', 'Engineering', 'AI-ML', 'Architecture', 'Design', 'Leadership'];
 
-  const handleLike = (id: string) => {
+  useEffect(() => {
+    setIsLoading(true);
+    communityService.getPosts(selectedTag).then((data) => {
+      setPosts(data);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+    });
+  }, [selectedTag]);
+
+  const handleLike = async (id: string) => {
     setPosts(posts.map(p => {
       if (p.id === id) {
         return {
@@ -27,9 +38,10 @@ export const CommunityModule: React.FC = () => {
       }
       return p;
     }));
+    await communityService.toggleLike(id, true);
   };
 
-  const handleCreatePost = (e: React.FormEvent) => {
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostText.trim()) return;
 
@@ -40,7 +52,7 @@ export const CommunityModule: React.FC = () => {
       authorRole: 'Lead Frontend Engineer',
       authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
       content: newPostText.trim(),
-      tags: ['Engineering', 'Architecture'],
+      tags: selectedTag === 'All' ? ['Engineering'] : [selectedTag],
       likes: 1,
       commentsCount: 0,
       timestamp: 'Just now',
@@ -49,6 +61,12 @@ export const CommunityModule: React.FC = () => {
 
     setPosts([newPost, ...posts]);
     setNewPostText('');
+
+    await communityService.createPost('profile_current', {
+      title: newPostText.trim().substring(0, 50),
+      content: newPostText.trim(),
+      groupTag: (selectedTag === 'All' ? 'Engineering' : selectedTag) as any,
+    });
   };
 
   return (
@@ -113,68 +131,80 @@ export const CommunityModule: React.FC = () => {
       </form>
 
       {/* Feed */}
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <div key={post.id} className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-3">
-            {/* Author */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img
-                  src={post.authorAvatar}
-                  alt={post.authorName}
-                  className="w-9 h-9 rounded-xl object-cover ring-1 ring-blue-500/30"
-                />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-bold text-[#F8FAFC]">{post.authorName}</h4>
-                    <span className="text-[10px] text-cyan-400 font-mono px-1.5 py-0.2 rounded bg-cyan-950 border border-cyan-800/40">
-                      {post.authorCompany}
-                    </span>
+      {isLoading ? (
+        <div className="p-12 text-center text-xs text-[#94A3B8] rounded-2xl bg-[#10182A] border border-[#1E293B]">
+          Loading community discussions...
+        </div>
+      ) : posts.length === 0 ? (
+        <div className="p-12 text-center text-xs text-[#94A3B8] rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-2">
+          <MessageSquare className="w-8 h-8 text-[#64748B] mx-auto mb-2" />
+          <p className="text-sm font-semibold text-[#F8FAFC]">No discussions yet in this channel</p>
+          <p>Be the first to share an insight or question with the community.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <div key={post.id} className="p-5 rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-3">
+              {/* Author */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={post.authorAvatar}
+                    alt={post.authorName}
+                    className="w-9 h-9 rounded-xl object-cover ring-1 ring-blue-500/30"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-[#F8FAFC]">{post.authorName}</h4>
+                      <span className="text-[10px] text-cyan-400 font-mono px-1.5 py-0.2 rounded bg-cyan-950 border border-cyan-800/40">
+                        {post.authorCompany}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-[#94A3B8]">{post.authorRole} • {post.timestamp}</p>
                   </div>
-                  <p className="text-[10px] text-[#94A3B8]">{post.authorRole} • {post.timestamp}</p>
                 </div>
               </div>
+
+              {/* Post Content */}
+              <p className="text-xs text-[#F8FAFC] leading-relaxed">
+                {post.content}
+              </p>
+
+              {/* Tags */}
+              <div className="flex items-center gap-1.5 pt-1">
+                {post.tags.map(tag => (
+                  <span key={tag} className="text-[10px] text-blue-300 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/30">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Actions */}
+              <div className="pt-2 border-t border-[#1E293B] flex items-center gap-6 text-xs text-[#94A3B8]">
+                <button
+                  onClick={() => handleLike(post.id)}
+                  className={`flex items-center gap-1.5 transition-colors ${
+                    post.userLiked ? 'text-red-400 font-semibold' : 'hover:text-red-400'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 ${post.userLiked ? 'fill-current' : ''}`} />
+                  <span>{post.likes}</span>
+                </button>
+
+                <button className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>{post.commentsCount} comments</span>
+                </button>
+
+                <button className="flex items-center gap-1.5 hover:text-blue-400 transition-colors ml-auto">
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
+                </button>
+              </div>
             </div>
-
-            {/* Post Content */}
-            <p className="text-xs text-[#F8FAFC] leading-relaxed">
-              {post.content}
-            </p>
-
-            {/* Tags */}
-            <div className="flex items-center gap-1.5 pt-1">
-              {post.tags.map(tag => (
-                <span key={tag} className="text-[10px] text-blue-300 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/30">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Actions */}
-            <div className="pt-2 border-t border-[#1E293B] flex items-center gap-6 text-xs text-[#94A3B8]">
-              <button
-                onClick={() => handleLike(post.id)}
-                className={`flex items-center gap-1.5 transition-colors ${
-                  post.userLiked ? 'text-red-400 font-semibold' : 'hover:text-red-400'
-                }`}
-              >
-                <Heart className={`w-4 h-4 ${post.userLiked ? 'fill-current' : ''}`} />
-                <span>{post.likes}</span>
-              </button>
-
-              <button className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
-                <MessageSquare className="w-4 h-4" />
-                <span>{post.commentsCount} comments</span>
-              </button>
-
-              <button className="flex items-center gap-1.5 hover:text-blue-400 transition-colors ml-auto">
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

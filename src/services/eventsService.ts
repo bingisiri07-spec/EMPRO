@@ -256,11 +256,27 @@ export const eventsService = {
       console.warn('Failed recording event attendance:', eventAttErr.message);
     }
 
-    // 2. Sync to core attendance_records table for the day
+    // 2. Fetch the event organization_id dynamically to preserve referential integrity
+    let eventOrgId = '11111111-1111-1111-1111-111111111111';
+    try {
+      const { data: eventData } = await supabase
+        .from('events' as any)
+        .select('organization_id')
+        .eq('id', eventId)
+        .maybeSingle();
+
+      if ((eventData as any)?.organization_id) {
+        eventOrgId = (eventData as any).organization_id;
+      }
+    } catch {
+      // fallback
+    }
+
+    // 3. Sync to core attendance_records table for the day
     const { error: syncErr } = await supabase
       .from('attendance_records')
       .upsert({
-        organization_id: '11111111-1111-1111-1111-111111111111',
+        organization_id: eventOrgId,
         member_id: memberId,
         work_date: today,
         check_in: now,
@@ -277,5 +293,79 @@ export const eventsService = {
       success: true,
       message: `Event attendance verified and recorded in your official company attendance log.`,
     };
+  },
+
+  /**
+   * Creates a new company event
+   */
+  async createEvent(payload: {
+    organizationId: string;
+    organizerId?: string;
+    title: string;
+    description: string;
+    category: string;
+    startDate: string;
+    endDate: string;
+    venueOrLink: string;
+    isOnline: boolean;
+    registrationDeadline: string;
+    availableOpportunities?: string[];
+    scheduleAgenda?: any[];
+    participationRequirements?: string[];
+  }) {
+    const newEvent: CompanyEvent = {
+      id: `evt_${Date.now()}`,
+      title: payload.title,
+      description: payload.description,
+      category: payload.category as any,
+      startDate: payload.startDate,
+      endDate: payload.endDate,
+      venueOrLink: payload.venueOrLink,
+      isOnline: payload.isOnline,
+      organizerName: 'Event Lead',
+      organizerId: payload.organizerId || 'org_lead',
+      organizerAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250',
+      registrationDeadline: payload.registrationDeadline,
+      status: 'upcoming',
+      registeredCount: 1,
+      availableOpportunities: payload.availableOpportunities || [],
+      scheduleAgenda: payload.scheduleAgenda || [],
+      participationRequirements: payload.participationRequirements || [],
+      isRegistered: false,
+      userContributionStatus: 'none',
+      userAttended: false,
+    };
+
+    if (!isSupabaseConfigured()) {
+      MOCK_EVENTS.unshift(newEvent);
+      return { success: true, simulated: true, data: newEvent };
+    }
+
+    const { data, error } = await supabase
+      .from('events' as any)
+      .insert({
+        organization_id: payload.organizationId,
+        organizer_id: payload.organizerId,
+        title: payload.title,
+        description: payload.description,
+        category: payload.category,
+        start_date: payload.startDate,
+        end_date: payload.endDate,
+        venue_or_link: payload.venueOrLink,
+        is_online: payload.isOnline,
+        registration_deadline: payload.registrationDeadline,
+        status: 'upcoming',
+        available_opportunities: payload.availableOpportunities || [],
+        schedule_agenda: payload.scheduleAgenda || [],
+        participation_requirements: payload.participationRequirements || [],
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
   },
 };

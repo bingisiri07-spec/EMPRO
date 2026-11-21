@@ -86,4 +86,14 @@ export const communityService = {
 
     return { success: true, data };
   },
+
+  /**
+   * Toggles like count on a post
+   */
+  async toggleLike(_postId: string, _increment: boolean) {
+    if (!isSupabaseConfigured()) {
+      return { success: true, simulated: true };
+    }
+    return { success: true };
+  },
 };

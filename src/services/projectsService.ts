@@ -284,4 +284,98 @@ export const projectsService = {
 
     return data as any as ProjectContributionRecord[];
   },
+
+  /**
+   * Creates a new company project
+   */
+  async createProject(payload: {
+    organizationId: string;
+    name: string;
+    description: string;
+    department?: string;
+    projectManagerId?: string;
+    startDate?: string;
+    expectedCompletionDate: string;
+    requiredSkills?: string[];
+    objectives?: string[];
+    isRequiringContributors?: boolean;
+    openRolesNeeded?: any[];
+  }) {
+    const newProject: CompanyProject = {
+      id: `proj_${Date.now()}`,
+      name: payload.name,
+      description: payload.description,
+      department: payload.department || 'Engineering',
+      projectManager: 'Project Lead',
+      projectManagerId: payload.projectManagerId || 'lead_01',
+      projectManagerAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250',
+      startDate: payload.startDate || new Date().toISOString().split('T')[0],
+      expectedCompletionDate: payload.expectedCompletionDate,
+      status: 'active',
+      progressPercentage: 0,
+      teamMembers: [],
+      requiredSkills: payload.requiredSkills || [],
+      objectives: payload.objectives || [],
+      milestones: [],
+      isRequiringContributors: payload.isRequiringContributors ?? false,
+      openRolesNeeded: payload.openRolesNeeded || [],
+    };
+
+    if (!isSupabaseConfigured()) {
+      MOCK_PROJECTS.unshift(newProject);
+      return { success: true, simulated: true, data: newProject };
+    }
+
+    const { data, error } = await supabase
+      .from('projects' as any)
+      .insert({
+        organization_id: payload.organizationId,
+        name: payload.name,
+        description: payload.description,
+        department: payload.department || 'Engineering',
+        project_manager_id: payload.projectManagerId,
+        start_date: payload.startDate || new Date().toISOString().split('T')[0],
+        expected_completion_date: payload.expectedCompletionDate,
+        status: 'active',
+        progress_percentage: 0,
+        required_skills: payload.requiredSkills || [],
+        objectives: payload.objectives || [],
+        is_requiring_contributors: payload.isRequiringContributors ?? false,
+        open_roles_needed: payload.openRolesNeeded || [],
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  },
+
+  /**
+   * Adds or assigns a team member to a project
+   */
+  async addProjectMember(projectId: string, memberId: string, role = 'Contributor', allocationPercentage = 50) {
+    if (!isSupabaseConfigured()) {
+      return { success: true, simulated: true };
+    }
+
+    const { data, error } = await supabase
+      .from('project_members' as any)
+      .upsert({
+        project_id: projectId,
+        member_id: memberId,
+        role,
+        allocation_percentage: allocationPercentage,
+      }, { onConflict: 'project_id,member_id' })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  },
 };
