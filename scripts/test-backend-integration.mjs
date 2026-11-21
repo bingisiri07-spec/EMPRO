@@ -38,7 +38,8 @@ const migrationFiles = [
   '20261121000001_core_database_foundation.sql',
   '20261121000002_domain_modules_schema.sql',
   '20261122000001_collaboration_intelligence_schema.sql',
-  '20261122000002_skills_availability_schema.sql'
+  '20261122000002_skills_availability_schema.sql',
+  '20261122000003_functions_triggers_integrity.sql'
 ];
 
 let allMigrationsSql = '';
@@ -101,6 +102,14 @@ assert('Unique constraint: uq_project_member', /uq_project_member UNIQUE/i.test(
 assert('Unique constraint: uq_member_skill', /uq_member_skill UNIQUE/i.test(allMigrationsSql));
 assert('Index: idx_employee_skills_member_id', /idx_employee_skills_member_id/i.test(allMigrationsSql));
 assert('Index: idx_employee_availability_member_id', /idx_employee_availability_member_id/i.test(allMigrationsSql));
+
+// Database Functions & Triggers Integrity
+assert('Trigger Function: handle_new_user (auth profile creation)', /CREATE OR REPLACE FUNCTION public\.handle_new_user/i.test(allMigrationsSql));
+assert('Trigger Function: validate_event_registration', /CREATE OR REPLACE FUNCTION public\.validate_event_registration/i.test(allMigrationsSql));
+assert('Trigger Function: handle_event_attendance_sync', /CREATE OR REPLACE FUNCTION public\.handle_event_attendance_sync/i.test(allMigrationsSql));
+assert('Trigger Function: handle_event_contribution_status_change', /CREATE OR REPLACE FUNCTION public\.handle_event_contribution_status_change/i.test(allMigrationsSql));
+assert('Trigger Function: validate_project_member_organization', /CREATE OR REPLACE FUNCTION public\.validate_project_member_organization/i.test(allMigrationsSql));
+assert('Trigger Function: validate_project_contribution_organization', /CREATE OR REPLACE FUNCTION public\.validate_project_contribution_organization/i.test(allMigrationsSql));
 
 // ---------------------------------------------------------------------------
 // 2. SUPABASE SECURITY & RLS VERIFICATION
