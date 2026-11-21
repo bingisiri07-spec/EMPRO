@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Domain, Persona } from '../../types';
-import { DEMO_PERSONAS } from '../../data/mockData';
+import { Domain } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import { Sidebar } from './Sidebar';
 import { TopNavbar } from './TopNavbar';
 import { PersonalLockModal } from '../auth/PersonalLockModal';
+import { AuthModal } from '../auth/AuthModal';
 import { EmployeeDashboard } from '../professional/EmployeeDashboard';
 import { PersonalDashboard } from '../personal/PersonalDashboard';
 import { ManagerDashboard } from '../manager/ManagerDashboard';
@@ -20,7 +21,7 @@ import { CopilotModule } from '../modules/CopilotModule';
 import { Sparkles } from 'lucide-react';
 
 export const AppShell: React.FC = () => {
-  const [currentPersona, setCurrentPersona] = useState<Persona>(DEMO_PERSONAS.employee);
+  const { currentPersona, switchPersona, isLiveAuth, openAuthModal } = useAuth();
   const [currentDomain, setCurrentDomain] = useState<Domain>('professional');
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -92,13 +93,15 @@ export const AppShell: React.FC = () => {
         {/* Top Navbar */}
         <TopNavbar
           currentPersona={currentPersona}
-          onSwitchPersona={(p) => setCurrentPersona(p)}
+          onSwitchPersona={(p) => switchPersona(p)}
           isPersonalUnlocked={isPersonalUnlocked}
           onTogglePersonalLock={handleTogglePersonalLock}
           onOpenCopilot={() => {
             setActiveTab(currentDomain === 'professional' ? 'pro-copilot' : 'personal-copilot');
           }}
           onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onOpenAuthModal={openAuthModal}
+          isLiveAuth={isLiveAuth}
         />
 
         {/* Scrollable Viewport Area */}
@@ -201,6 +204,9 @@ export const AppShell: React.FC = () => {
         onClose={() => setShowLockModal(false)}
         onUnlockSuccess={handleUnlockSuccess}
       />
+
+      {/* Supabase Authentication & Session Modal */}
+      <AuthModal />
     </div>
   );
 };

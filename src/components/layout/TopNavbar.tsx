@@ -10,7 +10,9 @@ import {
   Check,
   Menu,
   Sun,
-  Moon
+  Moon,
+  Database,
+  ShieldCheck
 } from 'lucide-react';
 import { Persona, Role } from '../../types';
 import { DEMO_PERSONAS } from '../../data/mockData';
@@ -23,6 +25,8 @@ interface TopNavbarProps {
   onTogglePersonalLock: () => void;
   onOpenCopilot: () => void;
   onToggleMobileMenu: () => void;
+  onOpenAuthModal?: () => void;
+  isLiveAuth?: boolean;
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -32,6 +36,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onTogglePersonalLock,
   onOpenCopilot,
   onToggleMobileMenu,
+  onOpenAuthModal,
+  isLiveAuth = false,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [showPersonaDropdown, setShowPersonaDropdown] = useState(false);
@@ -104,6 +110,29 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             <>
               <Lock className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">Personal: Locked</span>
+            </>
+          )}
+        </button>
+
+        {/* Supabase Live Auth Status & Trigger */}
+        <button
+          onClick={onOpenAuthModal}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
+            isLiveAuth
+              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/40'
+              : 'bg-[#10182A] border-[#1E293B] text-[#94A3B8] hover:text-[#38BDF8] hover:border-blue-500/30'
+          }`}
+          title={isLiveAuth ? 'Supabase Live Session Active (Click to manage)' : 'Connect / Sign In to Supabase'}
+        >
+          {isLiveAuth ? (
+            <>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden xl:inline text-[11px] font-semibold text-emerald-300">Live Auth</span>
+            </>
+          ) : (
+            <>
+              <Database className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden xl:inline text-[11px] font-semibold text-[#94A3B8]">Supabase</span>
             </>
           )}
         </button>
@@ -217,6 +246,19 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     </button>
                   );
                 })}
+              </div>
+
+              <div className="pt-2 border-t border-[#1E293B]">
+                <button
+                  onClick={() => {
+                    setShowPersonaDropdown(false);
+                    onOpenAuthModal?.();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-[#151F35] hover:bg-[#19253F] border border-blue-500/30 text-cyan-300 text-xs font-medium transition-colors"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{isLiveAuth ? 'Manage Supabase Session' : 'Sign In with Supabase Account'}</span>
+                </button>
               </div>
             </div>
           )}
