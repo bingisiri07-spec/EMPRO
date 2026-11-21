@@ -8,10 +8,13 @@ import {
   ChevronDown, 
   Sparkles,
   Check,
-  Menu
+  Menu,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Persona, Role } from '../../types';
 import { DEMO_PERSONAS } from '../../data/mockData';
+import { useTheme } from '../../context/ThemeContext';
 
 interface TopNavbarProps {
   currentPersona: Persona;
@@ -30,6 +33,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onOpenCopilot,
   onToggleMobileMenu,
 }) => {
+  const { theme, toggleTheme } = useTheme();
   const [showPersonaDropdown, setShowPersonaDropdown] = useState(false);
   const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
 
@@ -100,6 +104,26 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             <>
               <Lock className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">Personal: Locked</span>
+            </>
+          )}
+        </button>
+
+        {/* Theme Switch Control */}
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#10182A] border border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] text-xs font-medium transition-colors"
+          title={theme === 'dark' ? 'Dark Mode Active (Click to switch to Light Mode)' : 'Light Mode Active (Click to switch to Dark Mode)'}
+          aria-label="Toggle light/dark theme"
+        >
+          {theme === 'dark' ? (
+            <>
+              <Moon className="w-3.5 h-3.5 text-blue-400" />
+              <span className="hidden xl:inline text-[11px] font-semibold text-[#F8FAFC]">Dark</span>
+            </>
+          ) : (
+            <>
+              <Sun className="w-3.5 h-3.5 text-amber-500" />
+              <span className="hidden xl:inline text-[11px] font-semibold text-[#0F172A]">Light</span>
             </>
           )}
         </button>

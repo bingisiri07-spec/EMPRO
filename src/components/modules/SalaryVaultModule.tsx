@@ -15,8 +15,10 @@ import {
   Tooltip, 
   CartesianGrid 
 } from 'recharts';
+import { useTheme } from '../../context/ThemeContext';
 
 export const SalaryVaultModule: React.FC = () => {
+  const { isDark } = useTheme();
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
   const pastRevisions = [
@@ -186,11 +188,18 @@ export const SalaryVaultModule: React.FC = () => {
                   <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
-              <XAxis dataKey="period" stroke="#64748B" fontSize={11} tickLine={false} />
-              <YAxis stroke="#64748B" fontSize={11} tickLine={false} domain={[100000, 200000]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} vertical={false} />
+              <XAxis dataKey="period" stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} />
+              <YAxis stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} domain={[100000, 200000]} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#10182A', borderColor: '#1E293B', borderRadius: '12px', fontSize: '11px', color: '#F8FAFC' }}
+                contentStyle={{ 
+                  backgroundColor: isDark ? '#10182A' : '#FFFFFF', 
+                  borderColor: isDark ? '#1E293B' : '#CBD5E1', 
+                  borderRadius: '12px', 
+                  fontSize: '11px', 
+                  color: isDark ? '#F8FAFC' : '#0F172A',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+                }}
                 formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Amount']}
               />
               <Area type="monotone" dataKey="gross" stroke="#3B82F6" fillOpacity={1} fill="url(#salaryGrossGrad)" name="Gross" />

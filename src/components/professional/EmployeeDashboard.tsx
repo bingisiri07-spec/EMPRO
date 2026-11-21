@@ -28,6 +28,7 @@ import {
   MOCK_MEETINGS 
 } from '../../data/mockData';
 import { LeaveApplyModal } from './LeaveApplyModal';
+import { useTheme } from '../../context/ThemeContext';
 
 interface EmployeeDashboardProps {
   persona: Persona;
@@ -38,6 +39,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
   persona,
   onNavigateTab,
 }) => {
+  const { isDark } = useTheme();
   const [isCheckedIn, setIsCheckedIn] = useState(true);
   const [checkInTime, setCheckInTime] = useState('09:10 AM');
   const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -268,16 +270,23 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({
           <div className="h-64 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={MOCK_ATTENDANCE_WEEK} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
-                <XAxis dataKey="day" stroke="#64748B" fontSize={11} tickLine={false} />
-                <YAxis stroke="#64748B" fontSize={11} tickLine={false} domain={[0, 10]} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} vertical={false} />
+                <XAxis dataKey="day" stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} />
+                <YAxis stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} domain={[0, 10]} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#10182A', borderColor: '#1E293B', borderRadius: '12px', fontSize: '11px', color: '#F8FAFC' }}
-                  cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
+                  contentStyle={{ 
+                    backgroundColor: isDark ? '#10182A' : '#FFFFFF', 
+                    borderColor: isDark ? '#1E293B' : '#CBD5E1', 
+                    borderRadius: '12px', 
+                    fontSize: '11px', 
+                    color: isDark ? '#F8FAFC' : '#0F172A',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+                  }}
+                  cursor={{ fill: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.05)' }}
                   formatter={(value: any) => [`${value} hrs`, 'Duration']}
                 />
                 <Bar dataKey="hoursWorked" fill="#3B82F6" radius={[6, 6, 0, 0]} name="Logged Hours" />
-                <Bar dataKey="expectedHours" fill="#06B6D4" radius={[6, 6, 0, 0]} opacity={0.3} name="Target Hours" />
+                <Bar dataKey="expectedHours" fill="#06B6D4" radius={[6, 6, 0, 0]} opacity={isDark ? 0.3 : 0.45} name="Target Hours" />
               </BarChart>
             </ResponsiveContainer>
           </div>

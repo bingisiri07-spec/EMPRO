@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { Persona, LeaveRequest } from '../../types';
 import { MOCK_LEAVE_REQUESTS } from '../../data/mockData';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ManagerDashboardProps {
   persona: Persona;
@@ -30,6 +31,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
   persona,
   onNavigateTab: _onNavigateTab,
 }) => {
+  const { isDark } = useTheme();
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(MOCK_LEAVE_REQUESTS);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
@@ -248,12 +250,19 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
           <div className="h-60 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={teamAttendanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
-                <XAxis dataKey="day" stroke="#64748B" fontSize={11} tickLine={false} />
-                <YAxis stroke="#64748B" fontSize={11} tickLine={false} domain={[0, 8]} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} vertical={false} />
+                <XAxis dataKey="day" stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} />
+                <YAxis stroke={isDark ? '#64748B' : '#94A3B8'} fontSize={11} tickLine={false} domain={[0, 8]} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#10182A', borderColor: '#1E293B', borderRadius: '12px', fontSize: '11px', color: '#F8FAFC' }}
-                  cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
+                  contentStyle={{ 
+                    backgroundColor: isDark ? '#10182A' : '#FFFFFF', 
+                    borderColor: isDark ? '#1E293B' : '#CBD5E1', 
+                    borderRadius: '12px', 
+                    fontSize: '11px', 
+                    color: isDark ? '#F8FAFC' : '#0F172A',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  cursor={{ fill: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.05)' }}
                 />
                 <Bar dataKey="present" fill="#3B82F6" radius={[4, 4, 0, 0]} name="In-Office" stackId="a" />
                 <Bar dataKey="late" fill="#06B6D4" radius={[4, 4, 0, 0]} name="Remote/Late" stackId="a" />
