@@ -16,7 +16,10 @@ import {
   YAxis, 
   Tooltip, 
   ResponsiveContainer, 
-  CartesianGrid
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
 import { Persona } from '../../types';
 
@@ -155,20 +158,51 @@ export const HRDashboard: React.FC<HRDashboardProps> = ({
             <span className="text-xs font-mono text-cyan-400">4 Divisions</span>
           </div>
 
-          <div className="h-64 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={deptData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
-                <XAxis dataKey="name" stroke="#64748B" fontSize={11} tickLine={false} />
-                <YAxis stroke="#64748B" fontSize={11} tickLine={false} domain={[0, 70]} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#10182A', borderColor: '#1E293B', borderRadius: '12px', fontSize: '11px', color: '#F8FAFC' }}
-                  cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
-                  formatter={(value: any) => [`${value} members`, 'Headcount']}
-                />
-                <Bar dataKey="count" fill="#3B82F6" radius={[6, 6, 0, 0]} name="Employees" />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+            <div className="md:col-span-8 h-60 w-full pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={deptData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+                  <XAxis dataKey="name" stroke="#64748B" fontSize={11} tickLine={false} />
+                  <YAxis stroke="#64748B" fontSize={11} tickLine={false} domain={[0, 70]} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#10182A', borderColor: '#1E293B', borderRadius: '12px', fontSize: '11px', color: '#F8FAFC' }}
+                    cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
+                    formatter={(value: any) => [`${value} members`, 'Headcount']}
+                  />
+                  <Bar dataKey="count" fill="#3B82F6" radius={[6, 6, 0, 0]} name="Employees" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Donut Distribution Breakdown */}
+            <div className="md:col-span-4 h-52 flex flex-col items-center justify-center relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={deptData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={75}
+                    paddingAngle={4}
+                    dataKey="count"
+                  >
+                    {deptData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.color} stroke="#080D1B" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#10182A', borderColor: '#1E293B', borderRadius: '12px', fontSize: '11px', color: '#F8FAFC' }}
+                    formatter={(val: any) => [`${val} members`, 'Headcount']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span className="text-lg font-extrabold text-[#F8FAFC]">142</span>
+                <span className="text-[9px] uppercase tracking-wider text-[#64748B]">Total Staff</span>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#1E293B] text-xs">

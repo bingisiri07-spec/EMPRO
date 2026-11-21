@@ -25,6 +25,7 @@ export const AppShell: React.FC = () => {
   const [currentDomain, setCurrentDomain] = useState<Domain>('professional');
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPersonalUnlocked, setIsPersonalUnlocked] = useState(false);
   const [showLockModal, setShowLockModal] = useState(false);
   const [pendingTab, setPendingTab] = useState<string | null>(null);
@@ -83,6 +84,8 @@ export const AppShell: React.FC = () => {
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isPersonalUnlocked={isPersonalUnlocked}
+        isMobileOpen={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Viewport Container */}
@@ -96,6 +99,7 @@ export const AppShell: React.FC = () => {
           onOpenCopilot={() => {
             setActiveTab(currentDomain === 'professional' ? 'pro-copilot' : 'personal-copilot');
           }}
+          onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
 
         {/* Scrollable Viewport Area */}

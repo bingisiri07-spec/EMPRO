@@ -6,6 +6,15 @@ import {
   TrendingUp,
   Calendar
 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  CartesianGrid 
+} from 'recharts';
 
 export const SalaryVaultModule: React.FC = () => {
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
@@ -151,6 +160,43 @@ export const SalaryVaultModule: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Historical Effective-Dated Revisions Table */}
+      <div className="p-6 rounded-2xl bg-[#10182A] border border-[#1E293B] space-y-4">
+        <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
+          <div>
+            <h3 className="text-sm font-bold text-[#F8FAFC]">6-Month Payout & Merit Revision Trajectory</h3>
+            <p className="text-xs text-[#94A3B8]">Visual progression of gross and net compensation</p>
+          </div>
+          <span className="text-xs text-cyan-400 font-mono">+12% Merit Jump</span>
+        </div>
+
+        <div className="h-56 w-full pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={[...pastRevisions].reverse()} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="salaryNetGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.0}/>
+                </linearGradient>
+                <linearGradient id="salaryGrossGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+              <XAxis dataKey="period" stroke="#64748B" fontSize={11} tickLine={false} />
+              <YAxis stroke="#64748B" fontSize={11} tickLine={false} domain={[100000, 200000]} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#10182A', borderColor: '#1E293B', borderRadius: '12px', fontSize: '11px', color: '#F8FAFC' }}
+                formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Amount']}
+              />
+              <Area type="monotone" dataKey="gross" stroke="#3B82F6" fillOpacity={1} fill="url(#salaryGrossGrad)" name="Gross" />
+              <Area type="monotone" dataKey="net" stroke="#06B6D4" fillOpacity={1} fill="url(#salaryNetGrad)" name="Net" />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

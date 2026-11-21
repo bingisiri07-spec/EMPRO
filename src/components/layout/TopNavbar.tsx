@@ -7,7 +7,8 @@ import {
   Building2, 
   ChevronDown, 
   Sparkles,
-  Check
+  Check,
+  Menu
 } from 'lucide-react';
 import { Persona, Role } from '../../types';
 import { DEMO_PERSONAS } from '../../data/mockData';
@@ -18,6 +19,7 @@ interface TopNavbarProps {
   isPersonalUnlocked: boolean;
   onTogglePersonalLock: () => void;
   onOpenCopilot: () => void;
+  onToggleMobileMenu: () => void;
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -26,6 +28,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   isPersonalUnlocked,
   onTogglePersonalLock,
   onOpenCopilot,
+  onToggleMobileMenu,
 }) => {
   const [showPersonaDropdown, setShowPersonaDropdown] = useState(false);
   const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
@@ -37,9 +40,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   ];
 
   return (
-    <header className="h-16 bg-[#080D1B]/90 backdrop-blur-md border-b border-[#1E293B] px-4 md:px-6 flex items-center justify-between sticky top-0 z-30">
-      {/* Left: Search Bar & Context */}
-      <div className="flex items-center gap-4 flex-1 max-w-md">
+    <header className="h-16 bg-[#080D1B]/95 backdrop-blur-md border-b border-[#1E293B] px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0">
+      {/* Left: Mobile Menu Toggle & Search Bar */}
+      <div className="flex items-center gap-3 flex-1 max-w-md">
+        <button
+          onClick={onToggleMobileMenu}
+          className="md:hidden p-2 rounded-xl bg-[#10182A] border border-[#1E293B] text-[#94A3B8] hover:text-[#F8FAFC] transition-colors"
+          title="Toggle Navigation Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         <div className="relative w-full">
           <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -51,7 +62,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Company Badge */}
         <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#10182A] border border-[#1E293B] text-xs">
           <Building2 className="w-3.5 h-3.5 text-blue-400" />
@@ -67,7 +78,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-900/40 to-cyan-900/30 border border-blue-500/30 text-cyan-300 hover:text-white text-xs font-medium hover:border-cyan-400/60 transition-all shadow-blue-glow"
         >
           <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-          <span className="hidden sm:inline">EMPRO Copilot</span>
+          <span className="hidden sm:inline">Copilot</span>
         </button>
 
         {/* Personal Sanctuary Lock/Unlock Status */}
@@ -126,7 +137,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowPersonaDropdown(!showPersonaDropdown)}
-            className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-[#10182A] hover:bg-[#151F35] border border-[#1E293B] transition-colors"
+            className="flex items-center gap-2 p-1.5 pr-2.5 sm:pr-3 rounded-xl bg-[#10182A] hover:bg-[#151F35] border border-[#1E293B] transition-colors"
           >
             <img
               src={currentPersona.avatar}
