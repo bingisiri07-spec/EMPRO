@@ -8,6 +8,16 @@ import { EmployeeDashboard } from '../professional/EmployeeDashboard';
 import { PersonalDashboard } from '../personal/PersonalDashboard';
 import { ManagerDashboard } from '../manager/ManagerDashboard';
 import { HRDashboard } from '../hr/HRDashboard';
+import { DigitalIDModule } from '../modules/DigitalIDModule';
+import { SalaryVaultModule } from '../modules/SalaryVaultModule';
+import { AttendanceModule } from '../modules/AttendanceModule';
+import { LeaveModule } from '../modules/LeaveModule';
+import { MeetingsModule } from '../modules/MeetingsModule';
+import { DocumentsModule } from '../modules/DocumentsModule';
+import { DiaryModule } from '../modules/DiaryModule';
+import { AchievementsModule } from '../modules/AchievementsModule';
+import { CommunityModule } from '../modules/CommunityModule';
+import { CopilotModule } from '../modules/CopilotModule';
 import { Sparkles } from 'lucide-react';
 
 export const AppShell: React.FC = () => {
@@ -106,6 +116,20 @@ export const AppShell: React.FC = () => {
                 persona={currentPersona}
                 onNavigateTab={(tab) => setActiveTab(tab)}
               />
+            ) : activeTab === 'digital-id' ? (
+              <DigitalIDModule persona={currentPersona} />
+            ) : activeTab === 'salary-vault' ? (
+              <SalaryVaultModule />
+            ) : activeTab === 'attendance' ? (
+              <AttendanceModule />
+            ) : activeTab === 'leave' ? (
+              <LeaveModule />
+            ) : activeTab === 'meetings' ? (
+              <MeetingsModule />
+            ) : activeTab === 'documents' ? (
+              <DocumentsModule persona={currentPersona} />
+            ) : activeTab === 'pro-copilot' ? (
+              <CopilotModule currentDomain="professional" />
             ) : (
               /* Professional Module Placeholder */
               <div className="p-8 rounded-2xl bg-[#10182A] border border-[#1E293B] text-center space-y-4">
@@ -130,11 +154,19 @@ export const AppShell: React.FC = () => {
                 </div>
               </div>
             )
-          ) : activeTab === 'personal-overview' ? (
+          ) : activeTab === 'personal-overview' || activeTab === 'my-profile' || activeTab === 'goals' || activeTab === 'timeline' || activeTab === 'privacy' ? (
             <PersonalDashboard
               persona={currentPersona}
               onNavigateTab={(tab) => setActiveTab(tab)}
             />
+          ) : activeTab === 'diary' ? (
+            <DiaryModule />
+          ) : activeTab === 'achievements' ? (
+            <AchievementsModule />
+          ) : activeTab === 'community' ? (
+            <CommunityModule />
+          ) : activeTab === 'personal-copilot' ? (
+            <CopilotModule currentDomain="personal" />
           ) : (
             /* Personal Module Placeholder */
             <div className="p-8 rounded-2xl bg-[#10182A] border border-[#1E293B] text-center space-y-4">
