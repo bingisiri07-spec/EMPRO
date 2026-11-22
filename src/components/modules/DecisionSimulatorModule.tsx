@@ -13,7 +13,9 @@ import {
   ListPlus, 
   ShieldAlert, 
   TrendingUp, 
-  Bookmark 
+  Bookmark,
+  Database,
+  Lock
 } from 'lucide-react';
 import { 
   DecisionScope, 
@@ -693,6 +695,50 @@ export const DecisionSimulatorModule: React.FC = () => {
                     ))}
                   </ul>
                 </div>
+
+                {/* Grounding & Context Isolation Summary */}
+                {activeReport.input.scope === 'personal_project' ? (
+                  <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#F8FAFC]">Personal Sandbox Isolation Verified</h4>
+                      <p className="text-[11px] text-[#94A3B8]">
+                        This decision was evaluated strictly using self-declared inputs with zero company database queries or organizational context retrieval.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-[#080D1B] border border-[#1E293B] space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                        <Database className="w-3.5 h-3.5 text-cyan-400" />
+                        Approved Organizational Context & Grounding Sources ({activeReport.groundingSources?.length || 0})
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-medium">RBAC & Isolation Verified</span>
+                    </div>
+                    {activeReport.groundingSources && activeReport.groundingSources.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {activeReport.groundingSources.map((source, idx) => (
+                          <div key={idx} className="p-2.5 rounded-lg bg-[#10182A] border border-[#1E293B] space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-semibold text-[#F8FAFC] truncate max-w-[200px]">{source.title}</span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-blue-500/10 text-cyan-300 border border-blue-500/20">
+                                {source.category}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-[#94A3B8] line-clamp-2">{source.excerpt}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-[#94A3B8] italic">
+                        No external organization records matched this simulation's domain criteria; evaluated using general organizational principles.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

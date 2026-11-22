@@ -9,3 +9,4 @@ export * from './meetingService';
 export * from './eventsService';
 export * from './projectsService';
 export * from './decisionSimulatorService';
+export * from './aiIntelligenceService';

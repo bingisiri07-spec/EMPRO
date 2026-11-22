@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { CompanyProject, RecommendedContributor, ProjectContributionRecord, ContributionAllocationMode } from '../types';
-import { MOCK_PROJECTS, MOCK_RECOMMENDED_CONTRIBUTORS, MOCK_PROJECT_CONTRIBUTIONS } from '../data/mockData';
+import { aiIntelligenceService } from './aiIntelligenceService';
+import { MOCK_PROJECTS, MOCK_PROJECT_CONTRIBUTIONS } from '../data/mockData';
 
 export const projectsService = {
   /**
@@ -45,98 +46,10 @@ export const projectsService = {
    * AI Contribution Discovery Engine
    * Identifies missing responsibilities, evaluates verified skill profiles,
    * checks declared availability and current workload, and provides ranked recommendations
+   * with multi-dimensional scoring and cross-organization isolation.
    */
-  async discoverRecommendedContributors(projectId: string, _roleTitle?: string): Promise<RecommendedContributor[]> {
-    if (!isSupabaseConfigured()) {
-      return MOCK_RECOMMENDED_CONTRIBUTORS[projectId] || [
-        {
-          id: 'usr_priya_sharma',
-          name: 'Priya Sharma',
-          avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=250',
-          currentRole: 'Senior Product Designer',
-          department: 'Product & Design',
-          skillMatchPercentage: 96,
-          matchedSkills: ['UI/UX Design', 'Figma', 'Design Systems', 'Data Visualization'],
-          availability: 'Available (12h/week for 2 weeks)',
-          currentWorkload: 'Low (45%)',
-          recommendationReason: 'Priya authored the Nexus Core Design System and recently finished the Helios dashboards. Her current sprint workload is only 45%, leaving ample capacity to resolve the Apollo UI bottleneck.',
-        },
-        {
-          id: 'usr_daniel_kim',
-          name: 'Daniel Kim',
-          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
-          currentRole: 'Frontend & UI Specialist',
-          department: 'Customer Experience Squad',
-          skillMatchPercentage: 82,
-          matchedSkills: ['Figma', 'React', 'Component Polish'],
-          availability: 'Moderate (6h/week)',
-          currentWorkload: 'Moderate (70%)',
-          recommendationReason: 'Has strong UI implementation skills and extensive experience with Apollo design tokens. Can assist with component reviews and user testing.',
-        }
-      ];
-    }
-
-    // In a live Supabase environment, query organization members, their skills, and availability
-    try {
-      const { data: projectData } = await supabase
-        .from('projects')
-        .select('required_skills')
-        .eq('id', projectId)
-        .maybeSingle();
-
-      const requiredSkills: string[] = projectData?.required_skills || [];
-
-      const { data: candidates } = await supabase
-        .from('organization_members')
-        .select(`
-          id,
-          profile_id,
-          role,
-          profiles (full_name, profile_photo),
-          departments (department_name),
-          employee_skills (skill_name, proficiency_level, is_verified),
-          employee_availability (declared_hours_per_week, available_contribution_hours_per_week, current_workload_percent, workload_status)
-        `)
-        .limit(10);
-
-      if (candidates && candidates.length > 0) {
-        const computedRecommendations: RecommendedContributor[] = candidates.map((c: any) => {
-          const empSkills: string[] = (c.employee_skills || []).map((s: any) => s.skill_name);
-          const matchedSkills = empSkills.filter((s: string) => 
-            requiredSkills.some(req => req.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(req.toLowerCase()))
-          );
-
-          const matchPercentage = requiredSkills.length > 0 
-            ? Math.min(98, Math.max(40, Math.round((matchedSkills.length / requiredSkills.length) * 100))) 
-            : 85;
-
-          const avail = c.employee_availability?.[0] || c.employee_availability;
-          const availHours = avail?.available_contribution_hours_per_week || 10;
-          const workloadStatus = avail?.workload_status || 'Moderate (70%)';
-
-          return {
-            id: c.id,
-            name: c.profiles?.full_name || 'Team Colleague',
-            avatar: c.profiles?.profile_photo || `https://api.dicebear.com/7.x/bottts/svg?seed=${c.id}`,
-            currentRole: c.role === 'manager' ? 'Team Lead' : 'Specialist',
-            department: c.departments?.department_name || 'Engineering',
-            skillMatchPercentage: matchPercentage,
-            matchedSkills: matchedSkills.length > 0 ? matchedSkills : empSkills.slice(0, 3),
-            availability: `Available (${availHours}h/week)`,
-            currentWorkload: workloadStatus as any,
-            recommendationReason: `Verified skill profile matches requirements for this project with ${availHours} hours available contribution bandwidth.`,
-          };
-        });
-
-        // Sort descending by skill match percentage
-        computedRecommendations.sort((a, b) => b.skillMatchPercentage - a.skillMatchPercentage);
-        return computedRecommendations;
-      }
-    } catch {
-      // Fallback to rich mock data if error occurs or table is empty
-    }
-
-    return MOCK_RECOMMENDED_CONTRIBUTORS[projectId] || [];
+  async discoverRecommendedContributors(projectId: string, _roleTitle?: string, userOrgId?: string): Promise<RecommendedContributor[]> {
+    return aiIntelligenceService.matchProjectContributors(projectId, userOrgId);
   },
 
   /**

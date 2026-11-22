@@ -329,6 +329,7 @@ export interface DecisionSimulationReport {
   recommendationRationale: string;
   executionRoadmap: { phase: string; duration: string; keyDeliverable: string }[];
   importantConsiderations: string[];
+  groundingSources?: { title: string; category: string; excerpt: string }[];
   savedAt?: string;
 }
 
